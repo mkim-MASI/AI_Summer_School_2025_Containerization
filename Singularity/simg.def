@@ -1,0 +1,31 @@
+Bootstrap: docker
+From: python:3.11-slim
+
+%post
+    # Update and install system dependencies
+    apt-get update && apt-get install -y \
+        git \
+        wget \
+        curl \
+        build-essential \
+        vim \
+        && rm -rf /var/lib/apt/lists/*
+
+    # Upgrade pip
+    pip install --upgrade pip
+
+    # Install requested Python packages with specified versions
+    pip install \
+        "datasets>=4.0.0" \
+        "kagglehub>=0.3.12" \
+        "matplotlib>=3.10.5"
+    pip install torch==2.8.0+cpu torchvision==0.23.0+cpu --index-url https://download.pytorch.org/whl/cpu 
+
+    # make directory
+    mkdir -p /workspace
+
+%files
+    run_python_test.py /workspace/run_python_test.py
+
+%runscript
+    python3 /workspace/run_python_test.py
