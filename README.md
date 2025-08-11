@@ -167,10 +167,10 @@ cat run_python_test.py
 ## 5️⃣ Push Your Docker Image to Docker Hub
 Once you’ve built and tested your Docker image locally, you might want to share it with others or use it on different machines. Docker Hub is a popular online registry where you can push (upload) your images and pull (download) them later.
 
-#### Step 1: Create a Docker Hub account (if you haven't already)
+### Step 1: Create a Docker Hub account (if you haven't already)
 Go to [Docker Hub](https://hub.docker.com/) and sign up for a free account.
 
-#### Step 2: Log in to Docker Hub from your command line
+### Step 2: Log in to Docker Hub from your command line
 Run the following command and enter your Docker Hub username and password when prompted:
 ```bash
 docker login
@@ -181,7 +181,7 @@ You should see:
 Login Succeeded
 ```
 
-## Step 3: Tag your local image for Docker Hub
+### Step 3: Tag your local image for Docker Hub
 Docker images need to be tagged with your Docker Hub username and repository name before pushing. The format is:
 ```bash
 <dockerhub-username>/<repository-name>:<tag>
@@ -194,7 +194,7 @@ docker tag my_docker mkim/my-docker-image:latest
 
 Note that a **tag** is a way to version control your container in case you make updates. This is especially helpful for continuous development so that users know which **exact** version of your code they are using.
 
-## Step 4: Push the image to Docker Hub
+### Step 4: Push the image to Docker Hub
 Now, push your tagged image to Docker Hub:
 ```bash
 docker push <dockerhub-username>/<repository-name>:<tag>
@@ -208,26 +208,148 @@ https://hub.docker.com/repositories/<dockerhub-username>
 
 where you should see your container! By default, when you create a new repository on Docker Hub, it might be set to private depending on your account type. Thus, if you want to share it with others, you need to make it public. To make it public:
 
-1.) Go to https://hub.docker.com/ and log in.
+- 1.) Go to https://hub.docker.com/ and log in.
 
-2.) Click on your username (top right), then Repositories.
+- 2.) Click on your username (top right), then Repositories.
 
-3.) Select the repository you want to make public.
+- 3.) Select the repository you want to make public.
 
-4.) Go to the Settings tab.
+- 4.) Go to the Settings tab.
 
-5.) Scroll down to Repository Visibility.
+- 5.) Scroll down to Repository Visibility.
 
-6.) Choose Public and save the changes.
+- 6.) Choose Public and save the changes.
 
+Now, anyone can pull your container from DockerHub!
 
-Now, anyone can pull your image without needing permission!
+### Alternative: Export Docker image as a file
+Sometimes, you may want to share your Docker image without using an online registry like Docker Hub. For example, if you’re working on a secure network without internet access or want to transfer the image via USB. Docker lets you save your image to a file and load it on another machine.
 
-- Singularity/Apptainer as well
-- Docker to singularity for HPC
-- 
+#### Step 1: Save your Docker image to a tar file
 
+Use the `docker save` command to export your image into a single tarball file:
 
+```bash
+# This command will create a file named my_docker_image.tar in your current directory.
+docker save -o my_docker_image.tar my_docker
+```
+- `-o my_docker_image.tar` specifies the output filename.
+
+You can then transfer this to someone else just as you would any other file.
+
+#### Step 2: Load the .tar file
+
+Once you have a Docker image as a `.tar` file, you can load it by running:
+```bash
+docker load -i my_docker_image.tar
+```
+
+Make sure that when you push your Docker, you provide plenty of documentation for how someone would need to run your container! Some helpful things to include:
+- example input/output data
+- example commands
+- expected runtime / memory usage
+
+---
+## 6️⃣ Pull a Container From Docker Hub
+
+Once you have pushed your Docker image to Docker Hub or want to try out someone else’s image, you can pull it from the command line and run it locally.
+
+---
+
+### Step 1: View your own image on Docker Hub from the command line
+
+You can search Docker Hub for your images using the `docker search` command. However, this shows public images across all users.
+
+To find your own images more reliably, you can visit your Docker Hub profile on the web.
+
+Example search command:
+
+```bash
+docker search <your-dockerhub-username>
+```
+
+### Step 2: View someone else’s image
+If your collaborator shares their Docker Hub repository name (for example, `collabuser/their-image`), you can also search or pull their image directly.
+```bash
+docker search collabuser/their-image
+```
+
+### Step 3: Pull the container (image) from Docker Hub
+To download the image from Docker Hub to your local machine, run:
+```bash
+docker pull <dockerhub-username>/<repository-name>:<tag>
+```
+
+### Step 4: Check that the image is downloaded
+After pulling, confirm that the Docker container is there:
+```bash
+docker images
+```
+
+And just like the container you built earlier, you can run/debug this one too!
+
+---
+
+At this point, you should have all the general knowledge needed for how to 1.) build a Docker container, 2.) run and debug your container, and 3.) share your container with others.
+
+---
+
+# BONUS: Singularity/Apptainer
+
+Unfortunately, Docker requires super user (`sudo`) permissions to build/run containers. This can be problematic when you need to run code on high performance clusters (HPC) for large-throughput. To circumvent this issue, a containerization platform called **Singularity** (now called **Apptainer**) was created specifically for scientific computing purposes. The general framework is largely similar, with some syntax differences and other nuances.
+
+---
+
+## Install Singularity/Apptainer
+
+- On most Linux systems, you can install Singularity using your package manager or from source.  
+- For detailed instructions, visit: [https://apptainer.org/docs/admin/installation](https://apptainer.org/docs/admin/installation)
+
+I would recommend installing an existing pre-built version from here: [Apptainer Releases](https://github.com/apptainer/apptainer/releases)
+
+---
+
+## Building a Singularity Container
+
+```bash
+cd ../Singularity
+bash build_simg.sh
+```
+
+---
+
+## Running a Singularity Container
+
+One noteable difference is that Singularity/Apptainer does NOT explicity "isolate" the container from the rest of the host system by default. To do so, you MUST use the `-ec` flags. Thus, to run the container:
+```bash
+singularity run -ec myimg.simg
+```
+
+Note that just as you could bind directories using `-v` with Docker containers, you can similarly bind directories using `-B` with singularity containers:
+
+```bash
+singularity run -ec -B /path/to/outside/directory:/path/to/directory/in/container myimg.simg
+```
+---
+
+## Shelling into a Singularity Container
+
+```bash
+singularity shell -ec myimg.simg
+```
+---
+
+One of the nice things about Singularity/Apptainer containers is that they are just files, and thus can easily be transferred. Although there is no "Apptainer Hub," you can upload your containers to a backed-up, online repository like Zenodo: [Zenodo](https://zenodo.org/)
+
+---
+
+# BONUS: Convert Docker to Singularity
+
+You can use the `singularity pull` command to convert a Docker image to a Singularity image (`.sif` file):
+
+```bash
+singularity pull docker://<dockerhub-username>/<repository-name>:<tag>
+```
 
 
 
