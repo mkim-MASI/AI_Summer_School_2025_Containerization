@@ -2,6 +2,17 @@
 
 This tutorial will walk you through creating, running, and exploring a Docker container. Additionally, there are steps below for doing the same with Singularity/Apptainer.
 
+- [What is a Container?](#what-is-a-container)
+- [0️⃣ Install Docker Desktop](#0-install-docker-desktop)
+- [1️⃣ Clone this repository](#1-clone-this-repository)
+- [2️⃣ Build the Docker image](#2-build-the-docker-image)
+- [3️⃣ Run the Docker container](#3-run-the-docker-container)
+- [4️⃣ Shell into the Docker container](#4-shell-into-the-docker-container)
+- [5️⃣ Push Your Docker Image to Docker Hub](#5-push-your-docker-image-to-docker-hub)
+- [6️⃣ Pull a Container From Docker Hub](#6-pull-a-container-from-docker-hub)
+- [BONUS: Singularity/Apptainer](#6-Singularity/Apptainer)
+- [BONUS: Convert Docker to Singularity](#bonus-convert-docker-to-singularity)
+
 ---
 # What is a Container?
 
